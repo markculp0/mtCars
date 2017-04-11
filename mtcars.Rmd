@@ -1,0 +1,17 @@
+---
+title: "Regression Models: Motor Trend Cars Analysis"
+author: "Mark Culp"
+date: "April 10, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Executive Summary
+This report examines Motor Trend car road tests extracted from the 1974 Motor Trend US magazine.  These road tests were conducted on 1973-1974 car models.  The tests examined 10 aspects of automobile design and performance for 32 different models.  We focused here on the miles per gallon (mpg) performance of automatic versus manual transmissions.   
+
+
+## Including Plots
+
