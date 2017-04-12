@@ -13,5 +13,49 @@ knitr::opts_chunk$set(echo = TRUE)
 This report examines Motor Trend car road tests extracted from the 1974 Motor Trend US magazine.  These road tests were conducted on 1973-1974 car models.  The tests examined 10 aspects of automobile design and performance for 32 different models.  We focused here on the miles per gallon (mpg) performance of automatic versus manual transmissions.   
 
 
-## Including Plots
+# Appendix
+```{r}
+
+# Load data set
+data("mtcars")
+
+
+```
+## Exploratory Analysis
+
+```{r}
+
+# Examine columns and data types
+str(mtcars)
+
+# Range of MPG values
+range(mtcars$mpg)
+
+# Car transmissions: 
+# -----------------
+# 0 = automatic 
+# 1 = manual 
+table(mtcars$am)
+
+```
+
+## Fitting Multiple Models, Strategy
+
+```{r}
+
+```
+
+## Residual Plot and Diagnostics
+```{r}
+
+```
+
+## Conclusions : Quantified Uncertainty
+
+Cars with manual transmissions have better gas mileage than cars with automatic transmissions.  This can be quantified by ...
+
+```{r}
+
+```
+
 
