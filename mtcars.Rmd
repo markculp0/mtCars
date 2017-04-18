@@ -17,7 +17,9 @@ This report examines Motor Trend car road tests extracted from the 1974 Motor Tr
 ```{r}
 
 # Load data set
+library(datasets)
 data("mtcars")
+
 
 
 ```

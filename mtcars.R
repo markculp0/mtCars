@@ -3,11 +3,13 @@
 
 # [, 1]	 mpg	 Miles/(US) gallon
 # [, 2]	 cyl	 Number of cylinders
-# [, 3]	 disp	 Displacement (cu.in.)
 # [, 4]	 hp	 Gross horsepower
+# [, 6]	 wt  Weight (1000 lbs)
 # [, 9]	 am	 Transmission (0 = automatic, 1 = manual)
 
 # Load data set
+library(datasets)
+library(ggplot2)
 data("mtcars")
 
 # Subset manual transmissions
@@ -48,9 +50,20 @@ mean(mtcarAuto[,1])
 # Manual transmission:
 mean(mtcarMan[,1])
 
+# Summarize SLR comparison of auto vs man 
+# transmission
+summary(lm(mpg ~ factor(am) - 1 , mtcars))
+
 # And visually
 g <- ggplot(mtcars,aes(x=am,y=mpg))
 g <- g + geom_point()
+g
+
+## ---------------------------------
+
+
+# Examine 
+summary(lm(mpg ~ cyl + hp + wt + factor(am) - 1, mtcars))
 
 
 ## -----------------------------
