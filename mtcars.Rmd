@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 This report examines Motor Trend car road tests extracted from the 1974 Motor Trend US magazine.  These road tests were conducted on 1973-1974 car models.  The tests examined 10 aspects of automobile design and performance for 32 different models.  We focused here on the miles per gallon (mpg) performance of automatic versus manual transmissions.   
 
 
-# Appendix
+## Appendix
 ```{r}
 
 # Load data set
@@ -45,10 +45,51 @@ table(mtcars$am)
 
 ```{r}
 
+library(knitr)
+
+fit1 <- lm(mpg ~ am, data = mtcars)
+
+boxplot(mpg ~ am, data = mtcars,
+        boxwex = 0.4, at = 0:1 - 0.2,
+        main = "Auto vs Manual Transmission\n Simple Linear Regression (SLR)",
+        col = "yellow",
+        xlab = "Transmission : Auto = 0, Manual = 1",
+        ylab = "Miles Per Gallon",
+        xlim = c(-0.5,1), ylim = c(0,35), yaxs = "i")
+
+regressor <- c("cyl","disp","hp","wt","am", "gear","carb")
+correlate <- c(round(cor(mtcars$mpg,mtcars$cyl),3),
+               round(cor(mtcars$mpg,mtcars$disp),3),
+               round(cor(mtcars$mpg,mtcars$hp),3),
+               round(cor(mtcars$mpg,mtcars$wt),3),
+               round(cor(mtcars$mpg,mtcars$am),3),
+               round(cor(mtcars$mpg,mtcars$gear),3),
+               round(cor(mtcars$mpg,mtcars$carb),3)
+               )
+
+mtCor <- data.frame(regressor, correlate)
+
+kable(t(mtCor[,2]),caption = "Potential Regressors", col.names = t(mtCor[,1]))
+
+
 ```
 
 ## Residual Plot and Diagnostics
 ```{r}
+
+library(ggplot2)
+
+g <- ggplot(data.frame(x = mtcars$am, y = resid(fit1)), aes(x=x, y=y))
+g <- g + ggtitle("Residual Plot (SLR)") 
+g <- g + xlab("Transmission\n Auto=0, Man=1")
+g <- g + ylab("Residuals")
+g <- g + geom_point(size = 3, colour = "black")
+g <- g + geom_hline(yintercept = 0, size = 2)
+g <- g + scale_x_continuous(breaks = 0:1, limits = c(-0.5,1.5))
+g
+
+
+
 
 ```
 
