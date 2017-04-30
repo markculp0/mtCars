@@ -1,17 +1,55 @@
 ---
-title: "Regression Models: Motor Trend Cars Analysis"
+title: "Regression Models: Motor Trend Cars - Impact of Transmission Type on MPG"
 author: "Mark Culp"
-date: "April 10, 2017"
+date: "April 30, 2017"
 output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(knitr)
+
+# Examine the correlation between MPG and some of the
+# regressors likely to impact it.
+regressor <- c("cyl","disp","hp","wt","am", "gear","carb")
+correlate <- c(round(cor(mtcars$mpg,mtcars$cyl),3),
+               round(cor(mtcars$mpg,mtcars$disp),3),
+               round(cor(mtcars$mpg,mtcars$hp),3),
+               round(cor(mtcars$mpg,mtcars$wt),3),
+               round(cor(mtcars$mpg,mtcars$am),3),
+               round(cor(mtcars$mpg,mtcars$gear),3),
+               round(cor(mtcars$mpg,mtcars$carb),3)
+               )
+
+# Create data frame
+mtCor <- data.frame(regressor, correlate)
+
+# Display table of correlations
+regressorTable <- kable(t(mtCor[,2]),caption = "Potential Regressors", col.names = t(mtCor[,1]))
+
 ```
 
 ## Executive Summary
-This report examines Motor Trend car road tests extracted from the 1974 Motor Trend US magazine.  These road tests were conducted on 1973-1974 car models.  The tests examined 10 aspects of automobile design and performance for 32 different models.  We focused here on the miles per gallon (mpg) performance of automatic versus manual transmissions.   
+This report examines Motor Trend car road tests extracted from the 1974 Motor Trend US magazine.  These road tests were conducted on 1973-1974 car models.  The tests examined 10 aspects of automobile design and performance for 32 different models.  We focused here on the miles per gallon (MPG) performance of automatic versus manual transmissions.
 
+We concluded that cars with manual transmissions had better gas mileage than cars with automatic transmissions.  The differences in MPG attained under our Simple Linear Regression (SLR) analysis were dramatically higher than those obtained using Multivariable Linear Regression.  
+
+The effect of a car's transmission on MPG can be estimated with a relatively few number of variables contained in the mtcars data set.  We identified a suitable model using three variables: transmission type, weight, and cylinders.
+
+## Detail of Analysis
+
+We initially identified seven variables that appeared to have an impact on MPG.  Some calculations on the correlation between these variables and MPG were made to see if our intuition was correct.  A summary of those calculations is presented below:
+
+`r regressorTable`
+
+The above table summarizes these calculations.  The "am" variable is our transmission type regressor.  It is a numeric value with 0 designating a car with an automatic transmission, and 1 designating a car with a manual transmission.  Our table shows a 0.6 positive correlation with MPG as we compare cars with an automatic transmissions to those with a manual transmissions. 
+
+The number of forward gears and the number of carburetors on an automobile had lower correlations to MPG than the other five variables so we dropped them.  Our goal was to keep the model simple, and easily interpretable.  
+
+We then examined two sets of regressors that appeared to be highly correlated to each other.  First was displacement and weight.  The second was cylinders and horse power.  The correlation between displacement and weight was almost 89%.  The correlation between cylinders and horse power was about 83%.  
+
+While these variables describe very different car characteristics, their high correlations made them redundant.  We therefore excluded displacement and horse power from our final model (fit3).  Horse power was examined in the fourth model (fit4), but as expected, it contributed very little to our model.  The slope of our linear model only decreased by about 0.03 MPG.  
 
 ## Appendix
 ```{r}
@@ -23,7 +61,7 @@ data("mtcars")
 
 
 ```
-## Exploratory Analysis
+### Exploratory Analysis
 
 ```{r}
 
@@ -40,14 +78,29 @@ range(mtcars$mpg)
 table(mtcars$am)
 
 ```
+### Fitting Simple Linear Regression (SLR)
 
-## Fitting Multiple Models, Strategy
+```{r, fig.width=4,fig.height=3,fig.align='center'}
 
-```{r}
+# So, we estimate a 7.25 mpg increase
+# in moving from a automatic to a manual
+# transmission.  We expect to get 17 mpg 
+# with an automatic transmission.
+fit1 <- lm(mpg ~ factor(am) - 1, data = mtcars)
+coef(fit1)
 
-library(knitr)
+# This is consistent with the mean values:
+# Automatic transmission:
+mean(mtcars[mtcars[,9] == 0,1])
 
-fit1 <- lm(mpg ~ am, data = mtcars)
+# Manual transmission:
+mean(mtcars[mtcars[,9] == 1,1])
+
+# Summarize SLR comparison of auto vs man 
+# transmission
+summary(fit1)$coef
+
+# So we can reject the null hypothesis that the transmission has no impact on MPG.
 
 boxplot(mpg ~ am, data = mtcars,
         boxwex = 0.4, at = 0:1 - 0.2,
@@ -57,6 +110,17 @@ boxplot(mpg ~ am, data = mtcars,
         ylab = "Miles Per Gallon",
         xlim = c(-0.5,1), ylim = c(0,35), yaxs = "i")
 
+```
+
+### Fitting Multivariable Models
+
+```{r}
+
+library(knitr)
+
+# Examine the correlation between MPG and some of the
+# regressors likely to impact it.  Code for creating 
+# the Table 1, Potential Regessors.
 regressor <- c("cyl","disp","hp","wt","am", "gear","carb")
 correlate <- c(round(cor(mtcars$mpg,mtcars$cyl),3),
                round(cor(mtcars$mpg,mtcars$disp),3),
@@ -67,37 +131,55 @@ correlate <- c(round(cor(mtcars$mpg,mtcars$cyl),3),
                round(cor(mtcars$mpg,mtcars$carb),3)
                )
 
+# Create data frame
 mtCor <- data.frame(regressor, correlate)
 
-kable(t(mtCor[,2]),caption = "Potential Regressors", col.names = t(mtCor[,1]))
+# Table of correlations, Table 1, Potential Regressors
+regressorTable <- kable(t(mtCor[,2]),caption = "Potential Regressors", col.names = t(mtCor[,1]))
 
+# Examine correlation between displacement
+# and weight.  
+cor(mtcars$disp,mtcars$wt)
+
+# Examine correlation between cylinders
+# and horse power.  
+cor(mtcars$cyl,mtcars$hp)
+
+# Update our model to include weight, cylinders,
+# and horse power.
+fit2 <- update(fit1, mpg ~ factor(am) + wt - 1)
+fit3 <- update(fit1, mpg ~ factor(am) + wt + cyl - 1)
+fit4 <- update(fit1, mpg ~ factor(am) + wt + cyl + hp - 1)
+
+# Examine differences between fit3 and fit4 to 
+# assess value of including horsepower as a variable.
+summary(fit3)$coef
+summary(fit4)$coef
 
 ```
 
-## Residual Plot and Diagnostics
-```{r}
+### Residual Plot and Diagnostics
+```{r, fig.width=3,fig.height=2,fig.align='center'}
 
 library(ggplot2)
+library(car)
 
 g <- ggplot(data.frame(x = mtcars$am, y = resid(fit1)), aes(x=x, y=y))
 g <- g + ggtitle("Residual Plot (SLR)") 
 g <- g + xlab("Transmission\n Auto=0, Man=1")
 g <- g + ylab("Residuals")
-g <- g + geom_point(size = 3, colour = "black")
+g <- g + geom_point(size = 2, colour = "black")
 g <- g + geom_hline(yintercept = 0, size = 2)
 g <- g + scale_x_continuous(breaks = 0:1, limits = c(-0.5,1.5))
 g
 
+# Compute analysis of variance table  
+anova(fit1,fit2,fit3,fit4)
 
+# Examine variance inflation with 3 factors
+vif(lm(mpg ~ factor(am) + wt + cyl, mtcars))
+sqrt(vif(lm(mpg ~ factor(am) + wt + cyl, mtcars)))
 
-
-```
-
-## Conclusions : Quantified Uncertainty
-
-Cars with manual transmissions have better gas mileage than cars with automatic transmissions.  This can be quantified by ...
-
-```{r}
 
 ```
 
