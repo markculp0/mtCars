@@ -19,7 +19,6 @@ library(datasets)
 library(ggplot2)
 data("mtcars")
 
-
 ## --------------------
 ## Exploratory Analysis
 ## --------------------
@@ -133,13 +132,13 @@ g
 mtAnova <- anova(fit1,fit2,fit3,fit4)
 mtAnova
 
-
 # Examine variance inflation with 3 factors
 vif(lm(mpg ~ factor(am) + wt + cyl, mtcars))
 sqrt(vif(lm(mpg ~ factor(am) + wt + cyl, mtcars)))
 
-round(dfbetas(fit3),3)
-
+# Examine dfbetas to identify outliers
+dfb <- round(dfbetas(fit3),3)
+dfb[dfb[,1] > 0.5 | dfb[,1] < -0.5,]
 
 
 

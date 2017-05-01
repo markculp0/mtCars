@@ -43,61 +43,47 @@ We initially identified seven variables that appeared to have an impact on MPG. 
 
 `r regressorTable`
 
-The above table summarizes these calculations.  The "am" variable is our transmission type regressor.  It is a numeric value with 0 designating a car with an automatic transmission, and 1 designating a car with a manual transmission.  Our table shows a 0.6 positive correlation with MPG as we compare cars with an automatic transmissions to those with a manual transmissions. 
+The above table summarizes these calculations.  The "am" variable is our transmission type regressor.  It is a numeric value with 0 designating a car with an automatic transmission, and 1 designating a car with a manual transmission.  Our table shows a 0.6 positive correlation with MPG as we compare cars with automatic transmissions to those with manual transmissions. 
 
-The number of forward gears and the number of carburetors on an automobile had lower correlations to MPG than the other five variables so we dropped them.  Our goal was to keep the model simple, and easily interpretable.  
+The number of forward gears and the number of carburetors on an automobile had lower correlations to MPG than the other five variables so we dropped them.  Our goal was to keep the model simple, and easily interpretable at the risk of introducing bias from omitting relevant predictors.  
 
-We then examined two sets of regressors that appeared to be highly correlated to each other.  First was displacement and weight.  The second was cylinders and horse power.  The correlation between displacement and weight was almost 89%.  The correlation between cylinders and horse power was about 83%.  
+We then examined two sets of regressors that appeared to be highly correlated to each other.  First was displacement and weight.  The second was cylinders and horsepower.  The correlation between displacement and weight was almost 89%.  The correlation between cylinders and horsepower was about 83%.  
 
-While these variables describe very different car characteristics, their high correlations made them redundant.  We therefore excluded displacement and horse power from our final model (fit3).  Horse power was examined in the fourth model (fit4), but as expected, it contributed very little to our model.  The slope of our linear model only decreased by about 0.03 MPG.  
+While these variables describe very different car characteristics, their high correlations made them redundant.  We therefore excluded displacement and horsepower from our final model (fit3).  Horsepower was examined in the fourth model (fit4), but as expected, it contributed very little predictive value to our model.  The slope of the linear model only decreased by about 0.03 MPG.  
+
+Simple linear regression (SLR) identified an approximately 7.25 MPG difference between cars with automatic transmission and cars with manual transmission.  This was essentially the difference between the means of the two groups.  The differences were much less when other variables, or regressors, were considered.  Our analysis showed the weight of the car and the number of cylinders had a greater impact on MPG than transmission type.  
+
+We used the Analysis of Variance (anova) and VIF functions to assess the variances introduced by our multivariable model.  The anova function provided an F-statistic for fit4 indicating that the introduction of horsepower into the model was not statistically significant at the 95% confidence level.  The VIF function showed significant variance inflation from the introduction of all three of the regressors.  The weight variable introduced 3.6 times the variance produced by an ideal regressor.
+
+We used the dfbetas function to identify outliers in our data.  The Chrysler Imperial and the Toyota Corona were found to have low dfbetas relative to automatic transmissions.  Their low dfbetas here appears to have resulted from the relatively low MPGs each car had given their respective cylinder numbers and weights.
 
 ## Appendix
 ```{r}
-
 # Load data set
 library(datasets)
 data("mtcars")
-
-
-
 ```
 ### Exploratory Analysis
 
 ```{r}
-
 # Examine columns and data types
 str(mtcars)
 
 # Range of MPG values
 range(mtcars$mpg)
 
-# Car transmissions: 
-# -----------------
-# 0 = automatic 
-# 1 = manual 
+# Car transmissions: 0 = automatic, 1 = manual 
 table(mtcars$am)
-
 ```
 ### Fitting Simple Linear Regression (SLR)
 
 ```{r, fig.width=4,fig.height=3,fig.align='center'}
-
-# So, we estimate a 7.25 mpg increase
-# in moving from a automatic to a manual
-# transmission.  We expect to get 17 mpg 
-# with an automatic transmission.
+# So, we estimate a 7.25 mpg increase in moving from an 
+# automatic to a manual transmission.  We expect to get
+# 17 mpg with an automatic transmission.
 fit1 <- lm(mpg ~ factor(am) - 1, data = mtcars)
-coef(fit1)
 
-# This is consistent with the mean values:
-# Automatic transmission:
-mean(mtcars[mtcars[,9] == 0,1])
-
-# Manual transmission:
-mean(mtcars[mtcars[,9] == 1,1])
-
-# Summarize SLR comparison of auto vs man 
-# transmission
+# Summarize SLR comparison of auto vs man transmission
 summary(fit1)$coef
 
 # So we can reject the null hypothesis that the transmission has no impact on MPG.
@@ -109,13 +95,10 @@ boxplot(mpg ~ am, data = mtcars,
         xlab = "Transmission : Auto = 0, Manual = 1",
         ylab = "Miles Per Gallon",
         xlim = c(-0.5,1), ylim = c(0,35), yaxs = "i")
-
 ```
-
 ### Fitting Multivariable Models
 
 ```{r}
-
 library(knitr)
 
 # Examine the correlation between MPG and some of the
@@ -155,12 +138,10 @@ fit4 <- update(fit1, mpg ~ factor(am) + wt + cyl + hp - 1)
 # assess value of including horsepower as a variable.
 summary(fit3)$coef
 summary(fit4)$coef
-
 ```
 
 ### Residual Plot and Diagnostics
 ```{r, fig.width=3,fig.height=2,fig.align='center'}
-
 library(ggplot2)
 library(car)
 
@@ -178,9 +159,10 @@ anova(fit1,fit2,fit3,fit4)
 
 # Examine variance inflation with 3 factors
 vif(lm(mpg ~ factor(am) + wt + cyl, mtcars))
-sqrt(vif(lm(mpg ~ factor(am) + wt + cyl, mtcars)))
 
-
+# Examine dfbetas to identify outliers
+dfb <- round(dfbetas(fit3),3)
+dfb[dfb[,1] > 0.5 | dfb[,1] < -0.5,]
 ```
 
 
